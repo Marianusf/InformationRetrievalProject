@@ -95,7 +95,7 @@ public class SimpleInformationRetrievalSystem {
 
     public static void main(String[] args) {
         // Path ke folder dokumen (sesuaikan dengan lokasi Anda)
-        String documentsPath = "path/to/your/documents";
+        String documentsPath = "..\\Koleksi";
         SimpleInformationRetrievalSystem system = new SimpleInformationRetrievalSystem(documentsPath);
 
         Scanner scanner = new Scanner(System.in);
