@@ -11,6 +11,7 @@ package Code;
 import java.io.*;
 import java.util.*;
 import java.nio.file.*;
+
 // Sistem Pencarian Informasi Sederhana
 public class SimpleInformationRetrievalSystem {
 
@@ -29,7 +30,7 @@ public class SimpleInformationRetrievalSystem {
     private void bangunIndeks() {
         try {
             File folder = new File(pathFolderDokumen);
-            File[] fileList = folder.listFiles();
+            File[] fileList = urutkanFileBerdasarkanAngka(folder.listFiles());
 
             if (fileList != null) {
                 for (File file : fileList) {
@@ -84,6 +85,7 @@ public class SimpleInformationRetrievalSystem {
     }
 
     // Menampilkan seluruh struktur indeks terbalik
+    //fungsi ini untuk menampilkan semua kata yang ada pada dokumen
     public void tampilkanIndeksTerbalik() {
         System.out.println("Struktur Indeks Terbalik:");
         for (Map.Entry<String, ArrayList<String>> entry : indeksTerbalik.entrySet()) {
@@ -94,48 +96,38 @@ public class SimpleInformationRetrievalSystem {
             System.out.println();
         }
     }
+    
+    // Mengurutkan file berdasarkan angka yang terkandung dalam nama file
+    private File[] urutkanFileBerdasarkanAngka(File[] fileList) {
+        for (int i = 0; i < fileList.length - 1; i++) {
+            for (int j = i + 1; j < fileList.length; j++) {
+                int angkaI = ambilAngkaDariNama(fileList[i].getName());
+                int angkaJ = ambilAngkaDariNama(fileList[j].getName());
 
-    public static void main(String[] args) {
-        // Ganti path sesuai dengan lokasi folder dokumen Anda
-        String pathDokumen = "..\\Koleksi";
-        SimpleInformationRetrievalSystem sistem = new SimpleInformationRetrievalSystem(pathDokumen);
-
-        Scanner input = new Scanner(System.in);
-
-        while (true) {
-            System.out.println("\nMenu:");
-            System.out.println("1. Cari satu kata kunci");
-            System.out.println("2. Cari dengan dua kata kunci");
-            System.out.println("3. Tampilkan struktur indeks terbalik");
-            System.out.println("4. Keluar");
-            System.out.print("Pilih Opsi : ");
-
-            int pilihan = input.nextInt();
-            input.nextLine(); // menghilangkan newline
-
-            switch (pilihan) {
-                case 1:
-                    System.out.print("Masukkan Kata Kunci: ");
-                    String kata = input.nextLine();
-                    ArrayList<String> hasil1 = sistem.cariSatuKataKunci(kata);
-                    System.out.println("Dokumen yang mengandung '" + kata + "': " + hasil1);
-                    break;
-                case 2:
-                    System.out.print("Masukkan Kata Kunci (pisahkan dengan spasi): ");
-                    String[] kataKunci = input.nextLine().split(" ");
-                    ArrayList<String> hasil2 = sistem.cariBanyakKataKunci(kataKunci);
-                    System.out.println("Dokumen yang mengandung semua kata kunci: " + hasil2);
-                    break;
-                case 3:
-                    sistem.tampilkanIndeksTerbalik();
-                    break;
-                case 4:
-                    System.out.println("Keluar...");
-                    input.close();
-                    System.exit(0);
-                default:
-                    System.out.println("Opsi tidak valid.");
+                if (angkaI > angkaJ) {
+                    // tukar posisi file
+                    File temp = fileList[i];
+                    fileList[i] = fileList[j];
+                    fileList[j] = temp;
+                }
             }
         }
+        return fileList;
     }
+// Mengambil angka dari nama file, misal dari "doc12.txt" akan diambil angka 12
+    private int ambilAngkaDariNama(String namaFile) {
+        String angka = "";
+        for (int i = 0; i < namaFile.length(); i++) {
+            if (Character.isDigit(namaFile.charAt(i))) {
+                angka += namaFile.charAt(i);
+            }
+        }
+
+        if (angka.isEmpty()) {
+            return 0;
+        }
+
+        return Integer.parseInt(angka);
+    }
+
 }
