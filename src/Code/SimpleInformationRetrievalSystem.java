@@ -11,41 +11,42 @@ package Code;
 import java.io.*;
 import java.util.*;
 import java.nio.file.*;
-
+// Sistem Pencarian Informasi Sederhana
 public class SimpleInformationRetrievalSystem {
 
-    private HashMap<String, ArrayList<String>> invertedIndex;
-    private String documentsPath;
-    private ArrayList<String> documentNames;
+    private HashMap<String, ArrayList<String>> indeksTerbalik;
+    private String pathFolderDokumen;
+    private ArrayList<String> daftarNamaDokumen;
 
     public SimpleInformationRetrievalSystem(String path) {
-        invertedIndex = new HashMap<>();
-        documentsPath = path;
-        documentNames = new ArrayList<>();
-        buildIndex();
+        indeksTerbalik = new HashMap<>();
+        pathFolderDokumen = path;
+        daftarNamaDokumen = new ArrayList<>();
+        bangunIndeks();
     }
 
-    private void buildIndex() {
+    // Membangun struktur indeks terbalik dari dokumen-dokumen
+    private void bangunIndeks() {
         try {
-            File folder = new File(documentsPath);
-            File[] files = folder.listFiles();
+            File folder = new File(pathFolderDokumen);
+            File[] fileList = folder.listFiles();
 
-            if (files != null) {
-                for (File file : files) {
+            if (fileList != null) {
+                for (File file : fileList) {
                     if (file.isFile()) {
-                        String fileName = file.getName();
-                        documentNames.add(fileName);
+                        String namaFile = file.getName();
+                        daftarNamaDokumen.add(namaFile);
 
-                        String content = new String(Files.readAllBytes(file.toPath()));
-                        String[] words = content.toLowerCase().split("\\W+");
+                        String isi = new String(Files.readAllBytes(file.toPath()));
+                        String[] kataKata = isi.toLowerCase().split("\\W+");
 
-                        for (String word : words) {
-                            if (word.length() > 0) {
-                                if (!invertedIndex.containsKey(word)) {
-                                    invertedIndex.put(word, new ArrayList<>());
+                        for (String kata : kataKata) {
+                            if (kata.length() > 0) {
+                                if (!indeksTerbalik.containsKey(kata)) {
+                                    indeksTerbalik.put(kata, new ArrayList<>());
                                 }
-                                if (!invertedIndex.get(word).contains(fileName)) {
-                                    invertedIndex.get(word).add(fileName);
+                                if (!indeksTerbalik.get(kata).contains(namaFile)) {
+                                    indeksTerbalik.get(kata).add(namaFile);
                                 }
                             }
                         }
@@ -57,82 +58,83 @@ public class SimpleInformationRetrievalSystem {
         }
     }
 
-    public ArrayList<String> searchSingleKeyword(String keyword) {
-        keyword = keyword.toLowerCase();
-        if (invertedIndex.containsKey(keyword)) {
-            return invertedIndex.get(keyword);
+    // Pencarian berdasarkan satu kata kunci
+    public ArrayList<String> cariSatuKataKunci(String kataKunci) {
+        kataKunci = kataKunci.toLowerCase();
+        if (indeksTerbalik.containsKey(kataKunci)) {
+            return indeksTerbalik.get(kataKunci);
         }
         return new ArrayList<>();
     }
 
-    public ArrayList<String> searchMultipleKeywords(String[] keywords) {
-        if (keywords.length == 0) {
+    // Pencarian berdasarkan banyak kata kunci (hasil harus mengandung semuanya)
+    public ArrayList<String> cariBanyakKataKunci(String[] kataKunci) {
+        if (kataKunci.length == 0) {
             return new ArrayList<>();
         }
 
-        // Start with the first keyword's results
-        ArrayList<String> result = new ArrayList<>(searchSingleKeyword(keywords[0]));
+        ArrayList<String> hasil = new ArrayList<>(cariSatuKataKunci(kataKunci[0]));
 
-        // Intersect with other keywords' results
-        for (int i = 1; i < keywords.length; i++) {
-            ArrayList<String> currentResults = searchSingleKeyword(keywords[i]);
-            result.retainAll(currentResults);
+        for (int i = 1; i < kataKunci.length; i++) {
+            ArrayList<String> hasilSaatIni = cariSatuKataKunci(kataKunci[i]);
+            hasil.retainAll(hasilSaatIni); // hanya ambil yang ada di semua
         }
 
-        return result;
+        return hasil;
     }
 
-    public void printInvertedIndex() {
-        System.out.println("Inverted Index Structure:");
-        for (Map.Entry<String, ArrayList<String>> entry : invertedIndex.entrySet()) {
+    // Menampilkan seluruh struktur indeks terbalik
+    public void tampilkanIndeksTerbalik() {
+        System.out.println("Struktur Indeks Terbalik:");
+        for (Map.Entry<String, ArrayList<String>> entry : indeksTerbalik.entrySet()) {
             System.out.print(entry.getKey() + ": ");
-            for (String doc : entry.getValue()) {
-                System.out.print(doc + " ");
+            for (String dokumen : entry.getValue()) {
+                System.out.print(dokumen + " ");
             }
             System.out.println();
         }
     }
 
     public static void main(String[] args) {
-        // Path ke folder dokumen (sesuaikan dengan lokasi Anda)
-        String documentsPath = "..\\Koleksi";
-        SimpleInformationRetrievalSystem system = new SimpleInformationRetrievalSystem(documentsPath);
+        // Ganti path sesuai dengan lokasi folder dokumen Anda
+        String pathDokumen = "..\\Koleksi";
+        SimpleInformationRetrievalSystem sistem = new SimpleInformationRetrievalSystem(pathDokumen);
 
-        Scanner scanner = new Scanner(System.in);
+        Scanner input = new Scanner(System.in);
 
         while (true) {
             System.out.println("\nMenu:");
-            System.out.println("1. Search with single keyword");
-            System.out.println("2. Search with multiple keywords");
-            System.out.println("3. Show inverted index structure");
-            System.out.println("4. Exit");
-            System.out.print("Choose option: ");
+            System.out.println("1. Cari satu kata kunci");
+            System.out.println("2. Cari dengan dua kata kunci");
+            System.out.println("3. Tampilkan struktur indeks terbalik");
+            System.out.println("4. Keluar");
+            System.out.print("Pilih Opsi : ");
 
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // consume newline
+            int pilihan = input.nextInt();
+            input.nextLine(); // menghilangkan newline
 
-            switch (choice) {
+            switch (pilihan) {
                 case 1:
-                    System.out.print("Enter keyword: ");
-                    String keyword = scanner.nextLine();
-                    ArrayList<String> results = system.searchSingleKeyword(keyword);
-                    System.out.println("Documents containing '" + keyword + "': " + results);
+                    System.out.print("Masukkan Kata Kunci: ");
+                    String kata = input.nextLine();
+                    ArrayList<String> hasil1 = sistem.cariSatuKataKunci(kata);
+                    System.out.println("Dokumen yang mengandung '" + kata + "': " + hasil1);
                     break;
                 case 2:
-                    System.out.print("Enter keywords (separated by space): ");
-                    String[] keywords = scanner.nextLine().split(" ");
-                    ArrayList<String> multiResults = system.searchMultipleKeywords(keywords);
-                    System.out.println("Documents containing all keywords: " + multiResults);
+                    System.out.print("Masukkan Kata Kunci (pisahkan dengan spasi): ");
+                    String[] kataKunci = input.nextLine().split(" ");
+                    ArrayList<String> hasil2 = sistem.cariBanyakKataKunci(kataKunci);
+                    System.out.println("Dokumen yang mengandung semua kata kunci: " + hasil2);
                     break;
                 case 3:
-                    system.printInvertedIndex();
+                    sistem.tampilkanIndeksTerbalik();
                     break;
                 case 4:
-                    System.out.println("Exiting...");
-                    scanner.close();
+                    System.out.println("Keluar...");
+                    input.close();
                     System.exit(0);
                 default:
-                    System.out.println("Invalid option!");
+                    System.out.println("Opsi tidak valid.");
             }
         }
     }
