@@ -23,37 +23,37 @@ public class SimpleInformationRetrievalSystem_Main {
 
         while (true) {
             System.out.println("\nMenu:");
-            System.out.println("1. Search with single keyword");
-            System.out.println("2. Search with multiple keywords");
-            System.out.println("3. Show inverted index structure");
-            System.out.println("4. Exit");
-            System.out.print("Choose option: ");
+            System.out.println("1. Cari kata satu kata kunci");
+            System.out.println("2. Cari lebih dari satu kata kunci");
+            System.out.println("3. Lihat struktur inverted index");
+            System.out.println("4. Keluar");
+            System.out.print("Pilih Menu: ");
 
             int choice = scanner.nextInt();
-            scanner.nextLine(); // consume newline
+            scanner.nextLine(); 
 
             switch (choice) {
                 case 1:
-                    System.out.print("Enter keyword: ");
+                    System.out.print("Masukkan kata kunci: ");
                     String keyword = scanner.nextLine();
                     ArrayList<String> results = system.searchSingleKeyword(keyword);
-                    System.out.println("Documents containing '" + keyword + "': " + results);
+                    System.out.println("Dokumen yang memiliki kata'" + keyword + "': " + results);
                     break;
                 case 2:
-                    System.out.print("Enter keywords (separated by space): ");
+                    System.out.print("Masukkan kata kunci (pisahkan dengan spasi): ");
                     String[] keywords = scanner.nextLine().split(" ");
                     ArrayList<String> multiResults = system.searchMultipleKeywords(keywords);
-                    System.out.println("Documents containing all keywords: " + multiResults);
+                    System.out.println("Dokumen yang memiliki semua kata: " + multiResults);
                     break;
                 case 3:
                     system.printInvertedIndex();
                     break;
                 case 4:
-                    System.out.println("Exiting...");
+                    System.out.println("Keluar program...");
                     scanner.close();
                     System.exit(0);
                 default:
-                    System.out.println("Invalid option!");
+                    System.out.println("Invalid!");
             }
         }
     }
