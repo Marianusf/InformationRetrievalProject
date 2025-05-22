@@ -12,43 +12,57 @@ import java.io.*;
 import java.util.*;
 import java.nio.file.*;
 
+// Sistem Pencarian Informasi Sederhana
 public class SimpleInformationRetrievalSystem {
 
-    private HashMap<String, ArrayList<String>> invertedIndex;
-    private String documentsPath;
-    private ArrayList<String> documentNames;
+    private HashMap<String, ArrayList<String>> indeksTerbalik;
+    private String pathFolderDokumen;
+    private ArrayList<String> daftarNamaDokumen;
 
     public SimpleInformationRetrievalSystem(String path) {
-        invertedIndex = new HashMap<>();
-        documentsPath = path;
-        documentNames = new ArrayList<>();
-        buildIndex();
+        indeksTerbalik = new HashMap<>();
+        pathFolderDokumen = path;
+        daftarNamaDokumen = new ArrayList<>();
+        bangunIndeks();
     }
 
-    private void buildIndex() {
+    // Membangun struktur indeks terbalik dari dokumen-dokumen
+    private void bangunIndeks() {
         try {
-            File folder = new File(documentsPath);
-            File[] files = folder.listFiles();
+            File folder = new File(pathFolderDokumen);
+            File[] fileList = urutkanFileBerdasarkanAngka(folder.listFiles());
 
-            if (files != null) {
-                for (File file : files) {
+            if (fileList != null) {
+                for (File file : fileList) {
                     if (file.isFile()) {
-                        String fileName = file.getName();
-                        documentNames.add(fileName);
+                        String namaFile = file.getName();
+                        daftarNamaDokumen.add(namaFile);
 
-                        String content = new String(Files.readAllBytes(file.toPath()));
-                        String[] words = content.toLowerCase().split("\\W+");
+                        String isi = new String(Files.readAllBytes(file.toPath()));
+//                        String[] kataKata = isi.toLowerCase().split("\\W+");
+//
+//                        for (String kata : kataKata) {
+//                            if (kata.length() > 0) {
+//                                if (!indeksTerbalik.containsKey(kata)) {
+//                                    indeksTerbalik.put(kata, new ArrayList<>());
+//                                }
+//                                if (!indeksTerbalik.get(kata).contains(namaFile)) {
+//                                    indeksTerbalik.get(kata).add(namaFile);
+//                                }
+//                            }
+//                        }
+                        teksProcessing preprocessor = new teksProcessing();
+                        List<String> kataKata = preprocessor.proses(isi.toLowerCase());
 
-                        for (String word : words) {
-                            if (word.length() > 0) {
-                                if (!invertedIndex.containsKey(word)) {
-                                    invertedIndex.put(word, new ArrayList<>());
-                                }
-                                if (!invertedIndex.get(word).contains(fileName)) {
-                                    invertedIndex.get(word).add(fileName);
-                                }
+                        for (String kata : kataKata) {
+                            if (!indeksTerbalik.containsKey(kata)) {
+                                indeksTerbalik.put(kata, new ArrayList<>());
+                            }
+                            if (!indeksTerbalik.get(kata).contains(namaFile)) {
+                                indeksTerbalik.get(kata).add(namaFile);
                             }
                         }
+
                     }
                 }
             }
@@ -57,40 +71,75 @@ public class SimpleInformationRetrievalSystem {
         }
     }
 
-    public ArrayList<String> searchSingleKeyword(String keyword) {
-        keyword = keyword.toLowerCase();
-        if (invertedIndex.containsKey(keyword)) {
-            return invertedIndex.get(keyword);
+    // Pencarian berdasarkan satu kata kunci
+    public ArrayList<String> cariSatuKataKunci(String kataKunci) {
+        kataKunci = kataKunci.toLowerCase();
+        if (indeksTerbalik.containsKey(kataKunci)) {
+            return indeksTerbalik.get(kataKunci);
         }
         return new ArrayList<>();
     }
 
-    public ArrayList<String> searchMultipleKeywords(String[] keywords) {
-        if (keywords.length == 0) {
+    // Pencarian berdasarkan banyak kata kunci (hasil harus mengandung semuanya)
+    public ArrayList<String> cariBanyakKataKunci(String[] kataKunci) {
+        if (kataKunci.length == 0) {
             return new ArrayList<>();
         }
 
-        // Start with the first keyword's results
-        ArrayList<String> result = new ArrayList<>(searchSingleKeyword(keywords[0]));
+        ArrayList<String> hasil = new ArrayList<>(cariSatuKataKunci(kataKunci[0]));
 
-        // Intersect with other keywords' results
-        for (int i = 1; i < keywords.length; i++) {
-            ArrayList<String> currentResults = searchSingleKeyword(keywords[i]);
-            result.retainAll(currentResults);
+        for (int i = 1; i < kataKunci.length; i++) {
+            ArrayList<String> hasilSaatIni = cariSatuKataKunci(kataKunci[i]);
+            hasil.retainAll(hasilSaatIni); // hanya ambil yang ada di semua
         }
 
-        return result;
+        return hasil;
     }
 
-    public void printInvertedIndex() {
-        System.out.println("Inverted Index Structure:");
-        for (Map.Entry<String, ArrayList<String>> entry : invertedIndex.entrySet()) {
+    // Menampilkan seluruh struktur indeks terbalik
+    //fungsi ini untuk menampilkan semua kata yang ada pada dokumen
+    public void tampilkanIndeksTerbalik() {
+        System.out.println("Struktur Indeks Terbalik:");
+        for (Map.Entry<String, ArrayList<String>> entry : indeksTerbalik.entrySet()) {
             System.out.print(entry.getKey() + ": ");
-            for (String doc : entry.getValue()) {
-                System.out.print(doc + " ");
+            for (String dokumen : entry.getValue()) {
+                System.out.print(dokumen + " ");
             }
             System.out.println();
         }
+    }
+
+    // Mengurutkan file berdasarkan angka yang terkandung dalam nama file
+    private File[] urutkanFileBerdasarkanAngka(File[] fileList) {
+        for (int i = 0; i < fileList.length - 1; i++) {
+            for (int j = i + 1; j < fileList.length; j++) {
+                int angkaI = ambilAngkaDariNama(fileList[i].getName());
+                int angkaJ = ambilAngkaDariNama(fileList[j].getName());
+
+                if (angkaI > angkaJ) {
+                    // tukar posisi file
+                    File temp = fileList[i];
+                    fileList[i] = fileList[j];
+                    fileList[j] = temp;
+                }
+            }
+        }
+        return fileList;
+    }
+
+    private int ambilAngkaDariNama(String namaFile) {
+        String angka = "";
+        for (int i = 0; i < namaFile.length(); i++) {
+            if (Character.isDigit(namaFile.charAt(i))) {
+                angka += namaFile.charAt(i);
+            }
+        }
+
+        if (angka.isEmpty()) {
+            return 0;
+        }
+
+        return Integer.parseInt(angka);
     }
 
 }
