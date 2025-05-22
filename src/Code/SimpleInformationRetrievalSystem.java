@@ -39,18 +39,30 @@ public class SimpleInformationRetrievalSystem {
                         daftarNamaDokumen.add(namaFile);
 
                         String isi = new String(Files.readAllBytes(file.toPath()));
-                        String[] kataKata = isi.toLowerCase().split("\\W+");
+//                        String[] kataKata = isi.toLowerCase().split("\\W+");
+//
+//                        for (String kata : kataKata) {
+//                            if (kata.length() > 0) {
+//                                if (!indeksTerbalik.containsKey(kata)) {
+//                                    indeksTerbalik.put(kata, new ArrayList<>());
+//                                }
+//                                if (!indeksTerbalik.get(kata).contains(namaFile)) {
+//                                    indeksTerbalik.get(kata).add(namaFile);
+//                                }
+//                            }
+//                        }
+                        teksProcessing preprocessor = new teksProcessing();
+                        List<String> kataKata = preprocessor.proses(isi.toLowerCase());
 
                         for (String kata : kataKata) {
-                            if (kata.length() > 0) {
-                                if (!indeksTerbalik.containsKey(kata)) {
-                                    indeksTerbalik.put(kata, new ArrayList<>());
-                                }
-                                if (!indeksTerbalik.get(kata).contains(namaFile)) {
-                                    indeksTerbalik.get(kata).add(namaFile);
-                                }
+                            if (!indeksTerbalik.containsKey(kata)) {
+                                indeksTerbalik.put(kata, new ArrayList<>());
+                            }
+                            if (!indeksTerbalik.get(kata).contains(namaFile)) {
+                                indeksTerbalik.get(kata).add(namaFile);
                             }
                         }
+
                     }
                 }
             }
@@ -96,7 +108,7 @@ public class SimpleInformationRetrievalSystem {
             System.out.println();
         }
     }
-    
+
     // Mengurutkan file berdasarkan angka yang terkandung dalam nama file
     private File[] urutkanFileBerdasarkanAngka(File[] fileList) {
         for (int i = 0; i < fileList.length - 1; i++) {
@@ -114,7 +126,7 @@ public class SimpleInformationRetrievalSystem {
         }
         return fileList;
     }
-// Mengambil angka dari nama file, misal dari "doc12.txt" akan diambil angka 12
+
     private int ambilAngkaDariNama(String namaFile) {
         String angka = "";
         for (int i = 0; i < namaFile.length(); i++) {
