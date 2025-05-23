@@ -15,15 +15,16 @@ import java.nio.file.*;
 // Sistem Pencarian Informasi Sederhana
 public class SimpleInformationRetrievalSystem {
 
-    private HashMap<String, ArrayList<String>> indeksTerbalik;
+    private HashMap<String, ArrayList<String>> indeksTerbalik;//Peta (Map) dari kata ke daftar nama file yang mengandung kata itu. Ini adalah inti dari sistem pencarian.
     private String pathFolderDokumen;
     private ArrayList<String> daftarNamaDokumen;
 
+    //CONSTRUKTOR
     public SimpleInformationRetrievalSystem(String path) {
         indeksTerbalik = new HashMap<>();
         pathFolderDokumen = path;
         daftarNamaDokumen = new ArrayList<>();
-        bangunIndeks();
+        bangunIndeks();//setiap kelas ini membuat objek maka otomatis function bangunIndeks() dipanggil
     }
 
     // Membangun struktur indeks terbalik dari dokumen-dokumen
@@ -32,34 +33,24 @@ public class SimpleInformationRetrievalSystem {
             File folder = new File(pathFolderDokumen);
             File[] fileList = urutkanFileBerdasarkanAngka(folder.listFiles());
 
-            if (fileList != null) {
+            if (fileList != null) {//cek apakah array tidak kosong
                 for (File file : fileList) {
-                    if (file.isFile()) {
+                    if (file.isFile()) {//memastikan yang diproses adalah file
                         String namaFile = file.getName();
                         daftarNamaDokumen.add(namaFile);
-
-                        String isi = new String(Files.readAllBytes(file.toPath()));
-//                        String[] kataKata = isi.toLowerCase().split("\\W+");
-//
-//                        for (String kata : kataKata) {
-//                            if (kata.length() > 0) {
-//                                if (!indeksTerbalik.containsKey(kata)) {
-//                                    indeksTerbalik.put(kata, new ArrayList<>());
-//                                }
-//                                if (!indeksTerbalik.get(kata).contains(namaFile)) {
-//                                    indeksTerbalik.get(kata).add(namaFile);
-//                                }
-//                            }
-//                        }
-                        teksProcessing preprocessor = new teksProcessing();
+                        String isi = new String(Files.readAllBytes(file.toPath()));//baca seluruh isi file menjadi string
+                        
+                        teksProcessing preprocessor = new teksProcessing();//untuk stopword dan steaming dari kelas teksProcessing
+                        
+                        //diubah ke huruf kecil, kemudian dipanggil function process dari kelas teksProcessing
                         List<String> kataKata = preprocessor.proses(isi.toLowerCase());
 
-                        for (String kata : kataKata) {
-                            if (!indeksTerbalik.containsKey(kata)) {
-                                indeksTerbalik.put(kata, new ArrayList<>());
+                        for (String kata : kataKata) {//iterasi dari hasil processing
+                            if (!indeksTerbalik.containsKey(kata)) {//cek apakah kata sudah muncul sebelumnya pada indeks
+                                indeksTerbalik.put(kata, new ArrayList<>());//jika belum buat daftar baru
                             }
-                            if (!indeksTerbalik.get(kata).contains(namaFile)) {
-                                indeksTerbalik.get(kata).add(namaFile);
+                            if (!indeksTerbalik.get(kata).contains(namaFile)) {//cek juga apakah dokumen saat ini belum dicatat di daftar kata tersebut
+                                indeksTerbalik.get(kata).add(namaFile);//tambahkan nama dokumen ke daftar jika belum ada
                             }
                         }
 
@@ -96,6 +87,7 @@ public class SimpleInformationRetrievalSystem {
         return hasil;
     }
 
+    
     // Menampilkan seluruh struktur indeks terbalik
     //fungsi ini untuk menampilkan semua kata yang ada pada dokumen
     public void tampilkanIndeksTerbalik() {
@@ -109,24 +101,7 @@ public class SimpleInformationRetrievalSystem {
         }
     }
 
-    // Mengurutkan file berdasarkan angka yang terkandung dalam nama file
-    private File[] urutkanFileBerdasarkanAngka(File[] fileList) {
-        for (int i = 0; i < fileList.length - 1; i++) {
-            for (int j = i + 1; j < fileList.length; j++) {
-                int angkaI = ambilAngkaDariNama(fileList[i].getName());
-                int angkaJ = ambilAngkaDariNama(fileList[j].getName());
-
-                if (angkaI > angkaJ) {
-                    // tukar posisi file
-                    File temp = fileList[i];
-                    fileList[i] = fileList[j];
-                    fileList[j] = temp;
-                }
-            }
-        }
-        return fileList;
-    }
-
+    
     private int ambilAngkaDariNama(String namaFile) {
         String angka = "";
         for (int i = 0; i < namaFile.length(); i++) {
@@ -142,4 +117,22 @@ public class SimpleInformationRetrievalSystem {
         return Integer.parseInt(angka);
     }
 
+    
+    // Mengurutkan file berdasarkan angka yang terkandung dalam nama file, ini sejenis dengan sorting pakai bubble sort
+    private File[] urutkanFileBerdasarkanAngka(File[] fileList) {
+        for (int i = 0; i < fileList.length - 1; i++) {
+            for (int j = i + 1; j < fileList.length; j++) {
+                int angkaI = ambilAngkaDariNama(fileList[i].getName());
+                int angkaJ = ambilAngkaDariNama(fileList[j].getName());
+
+                if (angkaI > angkaJ) {//membandingan jika angkaI lebih besar dari angkaJ maka,
+                    // tukar posisi file
+                    File temp = fileList[i];
+                    fileList[i] = fileList[j];
+                    fileList[j] = temp;
+                }
+            }
+        }
+        return fileList;
+    }
 }

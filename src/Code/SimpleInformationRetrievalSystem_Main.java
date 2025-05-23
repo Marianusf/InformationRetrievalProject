@@ -8,7 +8,6 @@ package Code;
  *
  * @author maria
  */
-
 import java.io.*;
 import java.util.*;
 import java.nio.file.*;
@@ -17,12 +16,12 @@ public class SimpleInformationRetrievalSystem_Main {
 
     public static void main(String[] args) {
         // Path ke folder dokumen (pastikan disesuaikan dengan lokasi folder dokumen Anda)
-        String pathDokumen = "..\\Koleksi";
+        String pathDokumen = ".\\Koleksi";
         SimpleInformationRetrievalSystem sistem = new SimpleInformationRetrievalSystem(pathDokumen);
 
         Scanner scanner = new Scanner(System.in);
 
-                while (true) {
+        while (true) {
             System.out.println("\nMenu:");
             System.out.println("1. Cari dengan satu kata kunci");
             System.out.println("2. Cari dengan beberapa kata kunci");
@@ -53,7 +52,11 @@ public class SimpleInformationRetrievalSystem_Main {
                     System.out.print("Masukkan kata kunci: ");
                     String kataKunci = scanner.nextLine();
                     ArrayList<String> hasil = sistem.cariSatuKataKunci(kataKunci);
-                    System.out.println("Dokumen yang mengandung '" + kataKunci + "': " + hasil);
+                    if (hasil.isEmpty()) {
+                        System.out.println("Tidak ada dokumen yang mengandung kata kunci tersebut.");
+                    } else {
+                        System.out.println("Dokumen yang mengandung kata '" + kataKunci + "': " + hasil);
+                    }
                     break;
 
                 case 2:
